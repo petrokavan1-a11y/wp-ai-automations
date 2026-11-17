@@ -1,39 +1,54 @@
 export default async ({ req, res, log, error }) => {
   try {
     const payload = JSON.parse(req.payload);
-    const { post_id, title, raw_notes, type, brand, category } = payload;
+    const { post_id, title, raw_notes, type, brand } = payload;
 
     if (!post_id || !title) {
       return res.json({ success: false, error: 'Missing required fields' }, 400);
     }
 
-    // ۱. ساخت پرامپت پیشرفته بر اساس قالب تخصصی تجهیزات ایمنی شما
+    // پرامپت دقیق و جامع بر اساس تمام جزئیات، استایل‌ها و قوانین تمپلیت تخصصی تجهیزات ایمنی پتروکاوان
     const prompt = `
 تو یک متخصص ارشد سئو و بازاریابی دیجیتال در حوزه تجهیزات ایمنی صنعتی (B2B و B2C) برای سایت "پتروکاوان" هستی.
-محصولی با مشخصات زیر داریم:
+اطلاعات محصول زیر به تو داده شده است:
 - نام محصول: ${title}
-- برند: ${brand || 'نامشخص'}
-- اطلاعات اولیه و نکات: ${raw_notes || ''}
+- برند: ${brand || 'پتروکاوان / متفرقه'}
+- نکات و توضیحات اولیه: ${raw_notes || ''}
 
-لطفاً اطلاعات این محصول را با دقت و کاملاً حرفه‌ای، بدون کدهای اضافی اضافی و دقیقاً در قالب یک شیء JSON با کلیدهای زیر تولید کن:
+لطفاً محتوای این صفحه را با رعایت دقیق اصول زیر تولید کن و خروجی را فقط در قالب یک شیء JSON با کلیدهای زیر برگردان:
 
-1. "seo_title": یک تایتل جذاب سئو شده (شامل برند فارسی و انگلیسی، کاربرد، و کلمات تراکنشی).
-2. "meta_description": توضیحات متا سئو جذاب و ترغیب‌کننده.
-3. "focus_keyword": کلمه کلیدی اصلی رنک‌مث (دقیقاً ترکیب برند + مدل + نام محصول).
-4. "url_slug": آدرس URL انگلیسی استاندارد (فقط انگلیسی با خط تیره، مثلاً brand-model-product).
-5. "short_description": توضیحات کوتاه HTML فروش‌محور و جذاب (مطابق با استانداردهای سئو و تگ‌های پاراگراف).
-6. "full_description": توضیحات کامل و گسترده محصول به صورت HTML شامل:
-   - هدینگ‌های H2 بهینه‌شده
-   - جدول‌های مشخصات فنی و کاربردها با استایل دقیق (دارای ظرف واکنش‌گرا با overflow-x: auto، سطر اول نارنجی #f48026 با متن سفید، بدون پس‌زمینه و بدون بردر اضافی برای سایر سطرها).
-   - نکات نگهداری، استانداردهای ایمنی (مثل ATEX، CE یا NIOSH در صورت نیاز).
-7. "tags": برچسب‌های سئو شده جدا شده با کامای انگلیسی (مثلا: کلاه ایمنی, Centurion Vulcan, ...).
+1. "seo_title": یک تایتل جذاب سئو شده (شامل نام برند فارسی/انگلیسی، کاربرد اصلی و کلمات تراکنشی).
+2. "meta_description": توضیحات متا سئو جذاب و ترغیب‌کننده برای رنک‌مث.
+3. "focus_keyword": کلمه کلیدی اصلی (دقیقاً ترکیب برند + مدل + نام محصول جهت جلوگیری از تداخل معنایی).
+4. "url_slug": آدرس URL انگلیسی استاندارد بدون کاراکتر فارسی (فقط انگلیسی با خط تیره، مثلاً brand-model-product).
+5. "short_description": توضیحات کوتاه HTML فروش‌محور و جذاب (همراه با تگ‌های پاراگراف و استایل‌های استاندارد).
+6. "full_description": توضیحات کامل و جامع محصول به صورت HTML که شامل موارد زیر است:
+   - هدینگ‌های H2 بهینه‌شده با تراز متن مناسب.
+   - جدول‌های مشخصات فنی و کاربردها حتماً با این ساختار واکنش‌گرا و استایل‌دهی دقیق:
+     <div class="table-responsive" style="overflow-x: auto; width: 100%; margin: 30px 0;">
+       <table style="background-color: #f9f9f9; border: 1px solid #ddd; margin: 30px auto; width: 90%; border-collapse: collapse;">
+         <thead>
+           <tr style="background-color: #f48026; color: white;">
+             <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">ستون اول</th>
+             <th style="border: 1px solid #ddd; padding: 10px; text-align: center;">ستون دوم</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr>
+             <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">مقدار</td>
+             <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">مقدار</td>
+           </tr>
+         </tbody>
+       </table>
+     </div>
+   - رعایت شرایط لحن (B2B رسمی و مبتنی بر استانداردها یا B2C ترغیب‌کننده).
+   - تحلیل استانداردهای ایمنی (مانند ATEX، CE، NIOSH و غیره در صورت نیاز).
+   - پرهیز از تگ‌های خالی یا &nbsp; برای فاصله و استفاده از مارجین‌های CSS.
+7. "tags": برچسب‌های استاندارد جدا شده با کامای انگلیسی (مناسب برای کپی‌پست در وردپرس).
 8. "faqs": سوالات متداول به صورت متن ساده (خط اول سوال، خط دوم جواب).
-9. "attributes": ویژگی‌های ووکامرس برای فیلتر (به صورت ساختار نام=نامک).
-
-پاسخ را فقط و فقط در قالب یک فرمت استاندارد JSON برگردان.
 `;
 
-    // ۲. ارسال درخواست به هوش مصنوعی (OpenRouter)
+    // ارسال درخواست به OpenRouter (هوش مصنوعی)
     const aiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -50,7 +65,7 @@ export default async ({ req, res, log, error }) => {
     const aiData = await aiRes.json();
     const generated = JSON.parse(aiData.choices[0].message.content);
 
-    // ۳. آماده‌سازی پِی‌لود برای ارسال به وردپرس (ووکامرس)
+    // آماده‌سازی پِی‌لود جهت ارسال به وردپرس/ووکامرس
     const siteUrl = process.env.WP_SITE_URL;
     const wpPayload = {
       title: title,
@@ -64,9 +79,9 @@ export default async ({ req, res, log, error }) => {
       ]
     };
 
-    // ۴. ارسال درخواست به‌روزرسانی به ووکامرس / وردپرس از طریق REST API
+    // ارسال به وردپرس از طریق REST API
     const endpoint = type === 'product' 
-      ? `${siteUrl}/wp-json/wc/v3/products/${post_id}`
+      ? `${siteUrl}/wp-json/wp/v2/products/${post_id}`
       : `${siteUrl}/wp-json/wp/v2/posts/${post_id}`;
 
     const wpResponse = await fetch(endpoint, {
@@ -82,7 +97,7 @@ export default async ({ req, res, log, error }) => {
       throw new Error(`WordPress API failed: ${await wpResponse.text()}`);
     }
 
-    return res.json({ success: true, message: 'Template content generated and synced to WordPress successfully' });
+    return res.json({ success: true, message: 'Template content generated and synced successfully' });
 
   } catch (err) {
     error(err.message);
